@@ -1,0 +1,37 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.5
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  'npm:ejs:20161128':
+    - '@bower_components/bootstrap-treeview > ejs':
+        patched: '2019-08-28T15:44:51.130Z'
+  'npm:hoek:20180212':
+    - '@bower_components/bootstrap-treeview > phantomjs > request > hawk > boom > hoek':
+        patched: '2019-08-28T15:44:51.130Z'
+    - '@bower_components/bootstrap-treeview > phantomjs > request > hawk > sntp > hoek':
+        patched: '2019-08-28T15:44:51.130Z'
+    - '@bower_components/bootstrap-treeview > phantomjs > request > hawk > cryptiles > boom > hoek':
+        patched: '2019-08-28T15:44:51.130Z'
+    - '@bower_components/bootstrap-treeview > phantomjs > request > hawk > hoek':
+        patched: '2019-08-28T15:44:51.130Z'
+  'npm:mime:20170907':
+    - '@bower_components/bootstrap-treeview > express > send > mime':
+        patched: '2019-08-28T15:44:51.130Z'
+    - '@bower_components/bootstrap-treeview > express > connect > send > mime':
+        patched: '2019-08-28T15:44:51.130Z'
+  'npm:negotiator:20160616':
+    - '@bower_components/bootstrap-treeview > express > connect > negotiator':
+        patched: '2019-08-28T15:44:51.130Z'
+  'npm:qs:20140806-1':
+    - '@bower_components/bootstrap-treeview > express > connect > qs':
+        patched: '2019-08-28T15:44:51.130Z'
+  'npm:request:20160119':
+    - '@bower_components/bootstrap-treeview > phantomjs > request':
+        patched: '2019-08-28T15:44:51.130Z'
+  'npm:tough-cookie:20170905':
+    - '@bower_components/bootstrap-treeview > phantomjs > request > tough-cookie':
+        patched: '2019-08-28T15:44:51.130Z'
+  'npm:tunnel-agent:20170305':
+    - '@bower_components/bootstrap-treeview > phantomjs > request > tunnel-agent':
+        patched: '2019-08-28T15:44:51.130Z'
