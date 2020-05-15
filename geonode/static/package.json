@@ -46,7 +46,7 @@
     "mime": "^2.4.4",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.26",
-    "openlayers": "4.3.0-beta.3",
+    "openlayers": "4.5.0",
     "patternfly-bootstrap-treeview": "2.1.10",
     "proj4": "^2.5.0",
     "raty-js": "^2.9.0",
@@ -58,7 +58,8 @@
     "tree-filter": "^0.0.4",
     "tree-multiselect": "^2.6.1",
     "underscore": "^1.9.1",
-    "zeroclipboard": "^2.3.0"
+    "zeroclipboard": "^2.3.0",
+    "snyk": "^1.305.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",
@@ -80,6 +81,9 @@
     "yarn": ">= 1.0.0"
   },
   "scripts": {
-    "postinstall": ""
-  }
+    "postinstall": "",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
+  },
+  "snyk": true
 }
