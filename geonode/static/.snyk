@@ -1,0 +1,32 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.14.1
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-LODASH-567746:
+    - openlayers > closure-util > lodash:
+        patched: '2020-05-01T04:24:23.454Z'
+    - angular-openlayers-directive > openlayers > closure-util > lodash:
+        patched: '2020-05-01T04:24:23.454Z'
+    - leaflet-measure > lodash:
+        patched: '2020-05-01T04:24:23.454Z'
+    - openlayers > async > lodash:
+        patched: '2020-05-01T04:24:23.454Z'
+    - openlayers > closure-util > async > lodash:
+        patched: '2020-05-01T04:24:23.454Z'
+    - angular-openlayers-directive > openlayers > async > lodash:
+        patched: '2020-05-01T04:24:23.454Z'
+    - openlayers > jsdoc > catharsis > lodash:
+        patched: '2020-05-01T04:24:23.454Z'
+    - openlayers > jsdoc > requizzle > lodash:
+        patched: '2020-05-01T04:24:23.454Z'
+    - angular-openlayers-directive > openlayers > closure-util > async > lodash:
+        patched: '2020-05-01T04:24:23.454Z'
+    - openlayers > closure-util > gaze > globule > lodash:
+        patched: '2020-05-01T04:24:23.454Z'
+    - angular-openlayers-directive > openlayers > jsdoc > catharsis > lodash:
+        patched: '2020-05-01T04:24:23.454Z'
+    - angular-openlayers-directive > openlayers > jsdoc > requizzle > lodash:
+        patched: '2020-05-01T04:24:23.454Z'
+    - angular-openlayers-directive > openlayers > closure-util > gaze > globule > lodash:
+        patched: '2020-05-01T04:24:23.454Z'
