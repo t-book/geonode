@@ -107,12 +107,19 @@ jobs:
                   docker-compose -f docker-compose-test.yml exec db psql -U postgres -d test_geonode_data -c 'CREATE EXTENSION IF NOT EXISTS postgis;'
                   docker-compose -f docker-compose-test.yml exec django bash -c '<<parameters.test_suite>>'
                 working_directory: ./
+          
             - run:
                 name: Run pep8 checks
                 command: |
                   docker-compose -f docker-compose-test.yml exec django bash -c 'flake8 geonode'
                   docker-compose -f docker-compose-test.yml exec django bash -c 'codecov; bash <(curl -s https://codecov.io/bash) -t 2c0e7780-1640-45f0-93a3-e103b057d8c8'
                 working_directory: ./
+                
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts:
+          path: test-results 
 
 workflows:
 
