@@ -598,7 +598,13 @@ class TestUpload(UploaderBase):
 
         # First of all lets upload a raster
         fname = os.path.join(GOOD_DATA, 'raster', 'relief_san_andres.tif')
+        print('fname : ' + str(fname))
+        logger.warning('fname : ' + str(fname))
         self.assertTrue(os.path.isfile(fname))
+        print('self.complete_raster_upload : ' + str(self.complete_raster_upload))
+        logger.warning('session_ids : ' + str(session_ids)) 
+        print('session_ids : ' + str(session_ids))
+        logger.warning('self.complete_raster_upload : ' + str(self.complete_raster_upload)) 
         self.upload_file(
             fname,
             self.complete_raster_upload,
