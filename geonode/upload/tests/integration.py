@@ -390,16 +390,23 @@ class UploaderBase(GeoNodeBaseTestSupport):
         for main in filter(is_main, os.listdir(folder)):
             # get the abs path to the file
             _file = os.path.join(folder, main)
+            print('File: ' + _file)
             base, _ = os.path.splitext(_file)
+            print('File: ' + _base)
             resp, data = self.client.upload_file(_file)
+            print('resp: ' + _resp)
+            print('Data: ' + _data)
             if session_ids is not None:
                 if not isinstance(data, string_types) and data.get('url'):
                     session_id = re.search(
                         r'.*id=(\d+)', data.get('url')).group(1)
+                        print('session_id : ' + session_id)
                     if session_id:
                         session_ids += [session_id]
+                        print('session_id : ' + session_id)
             if not isinstance(data, string_types):
                 self.wait_for_progress(data.get('progress'))
+                  print('wait_for_progress : ' + self.wait_for_progress(data.get('progress')))
             final_check(base, resp, data)
 
     def upload_file(self, fname, final_check,
