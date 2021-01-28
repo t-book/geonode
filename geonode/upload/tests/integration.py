@@ -428,9 +428,12 @@ class UploaderBase(GeoNodeBaseTestSupport):
     def wait_for_progress(self, progress_url):
         if progress_url:
             resp = self.client.get(progress_url)
+            print("Resp: " + resp)
             json_data = resp.json()
+            print("json_data: " + json_data)
             # "COMPLETE" state means done
             if json_data.get('state', '') == 'RUNNING':
+                 print("running " + json_data.get('state', ''))
                 time.sleep(0.1)
                 self.wait_for_progress(progress_url)
 
