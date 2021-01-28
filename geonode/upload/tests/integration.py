@@ -406,7 +406,7 @@ class UploaderBase(GeoNodeBaseTestSupport):
                         print('session_id : ' + session_id)
             if not isinstance(data, string_types):
                 self.wait_for_progress(data.get('progress'))
-                  print('wait_for_progress : ' + self.wait_for_progress(data.get('progress')))
+                print('wait_for_progress : ' + self.wait_for_progress(data.get('progress')))
             final_check(base, resp, data)
 
     def upload_file(self, fname, final_check,
@@ -433,7 +433,7 @@ class UploaderBase(GeoNodeBaseTestSupport):
             print("json_data: " + json_data)
             # "COMPLETE" state means done
             if json_data.get('state', '') == 'RUNNING':
-                 print("running " + json_data.get('state', ''))
+                print("running " + json_data.get('state', ''))
                 time.sleep(0.1)
                 self.wait_for_progress(progress_url)
 
