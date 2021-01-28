@@ -390,23 +390,30 @@ class UploaderBase(GeoNodeBaseTestSupport):
         for main in filter(is_main, os.listdir(folder)):
             # get the abs path to the file
             _file = os.path.join(folder, main)
-            print('File: ' + _file)
+            print('File: ' + str(_file))
+            logger('File: ' + str(_file))
             base, _ = os.path.splitext(_file)
             print('File: ' + str(base))
+            logger('File: ' + str(base))
             resp, data = self.client.upload_file(_file)
             print('resp: ' + str(resp))
             print('Data: ' + str(data))
+            logger('resp: ' + str(resp))
+            logger('Data: ' + str(data))
             if session_ids is not None:
                 if not isinstance(data, string_types) and data.get('url'):
                     session_id = re.search(
                         r'.*id=(\d+)', data.get('url')).group(1)
-                    print('session_id : ' + session_id)
+                    print('session_id : ' + str(session_id))
+                    logger('session_id : ' + str(session_id))
                     if session_id:
                         session_ids += [session_id]
-                        print('session_id : ' + session_id)
+                        print('session_id : ' + str(session_id))
+                        logger('session_id : ' + str(session_id))
             if not isinstance(data, string_types):
                 self.wait_for_progress(data.get('progress'))
-                print('wait_for_progress : ' + self.wait_for_progress(data.get('progress')))
+                print('wait_for_progress : ' + str(self.wait_for_progress(data.get('progress'))))
+                logger('wait_for_progress : ' + str(self.wait_for_progress(data.get('progress'))))
             final_check(base, resp, data)
 
     def upload_file(self, fname, final_check,
@@ -428,12 +435,16 @@ class UploaderBase(GeoNodeBaseTestSupport):
     def wait_for_progress(self, progress_url):
         if progress_url:
             resp = self.client.get(progress_url)
-            print("Resp: " + resp)
+            print("progress_url: " + str(progress_url))
+            logger("progress_url: " + str(progress_url))
+            print("Resp: " + str(resp))
+            logger("Resp: " + str(resp))
             json_data = resp.json()
-            print("json_data: " + json_data)
+            print("json_data: " + str(json_data))
             # "COMPLETE" state means done
             if json_data.get('state', '') == 'RUNNING':
-                print("running " + json_data.get('state', ''))
+                print("running " + str(json_data.get('state', '')))
+                logger("running " + str(json_data.get('state', '')))
                 time.sleep(0.1)
                 self.wait_for_progress(progress_url)
 
