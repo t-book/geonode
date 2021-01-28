@@ -400,7 +400,7 @@ class UploaderBase(GeoNodeBaseTestSupport):
                 if not isinstance(data, string_types) and data.get('url'):
                     session_id = re.search(
                         r'.*id=(\d+)', data.get('url')).group(1)
-                        print('session_id : ' + session_id)
+                       print('session_id : ' + session_id)
                     if session_id:
                         session_ids += [session_id]
                         print('session_id : ' + session_id)
