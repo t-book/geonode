@@ -595,16 +595,11 @@ class TestUpload(UploaderBase):
     def test_coherent_importer_session(self):
         """ Tests that the upload computes correctly next session IDs"""
         session_ids = []
-
+"""
         # First of all lets upload a raster
         fname = os.path.join(GOOD_DATA, 'raster', 'relief_san_andres.tif')
-        print('fname : ' + str(fname))
-        logger.warning('fname : ' + str(fname))
         self.assertTrue(os.path.isfile(fname))
-        print('self.complete_raster_upload : ' + str(self.complete_raster_upload))
-        logger.warning('session_ids : ' + str(session_ids)) 
-        print('session_ids : ' + str(session_ids))
-        logger.warning('self.complete_raster_upload : ' + str(self.complete_raster_upload)) 
+
         self.upload_file(
             fname,
             self.complete_raster_upload,
@@ -627,7 +622,7 @@ class TestUpload(UploaderBase):
         self.assertTrue(len(session_ids) >= 0)
         if len(session_ids) > 1:
             self.assertTrue(int(session_ids[0]) < int(session_ids[1]))
-
+"""
     def test_extension_not_implemented(self):
         """Verify a error message is return when an unsupported layer is
         uploaded"""
