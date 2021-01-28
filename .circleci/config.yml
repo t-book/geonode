@@ -126,10 +126,10 @@ workflows:
   commit:
     jobs:
       - build:
-          name: geonode_test_suite_smoke
-          load_docker_cache: true
-          save_docker_cache: true
-          test_suite: coverage run --branch --source=geonode manage.py test -v 3 --keepdb geonode.tests.smoke
+#          name: geonode_test_suite_smoke
+#          load_docker_cache: true
+#          save_docker_cache: true
+#          test_suite: coverage run --branch --source=geonode manage.py test -v 3 --keepdb geonode.tests.smoke
 #      - build:
 #          name: geonode_test_suite
 #          load_docker_cache: true
@@ -149,8 +149,8 @@ workflows:
           load_docker_cache: true
           save_docker_cache: false
           test_suite: ./test_upload.sh
-          requires:
-            - geonode_test_suite_smoke
+#          requires:
+#            - geonode_test_suite_smoke
 #      - build:
 #          name: geonode_test_integration_monitoring
 #          load_docker_cache: true
