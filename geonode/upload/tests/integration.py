@@ -392,10 +392,10 @@ class UploaderBase(GeoNodeBaseTestSupport):
             _file = os.path.join(folder, main)
             print('File: ' + _file)
             base, _ = os.path.splitext(_file)
-            print('File: ' + _base)
+            print('File: ' + str(base))
             resp, data = self.client.upload_file(_file)
-            print('resp: ' + _resp)
-            print('Data: ' + _data)
+            print('resp: ' + str(resp))
+            print('Data: ' + str(data))
             if session_ids is not None:
                 if not isinstance(data, string_types) and data.get('url'):
                     session_id = re.search(
