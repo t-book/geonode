@@ -189,7 +189,218 @@ class UploaderBase(GeoNodeBaseTestSupport):
             from geonode.security.utils import purge_geofence_all
             purge_geofence_all()
 
+    def check_layer_geonode_page(self, path):
+        """ Check that the final layer page render's correctly after
+        an layer is uploaded """
+        # the final url for uploader process. This does a redirect to
+        # the final layer page in geonode
+        resp, _ = self.client.get_html(path)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue('content-type' in resp.headers)
 
+    def check_layer_geoserver_caps(self, type_name):
+        """ Check that a layer shows up in GeoServer's get
+        capabilities document """
+        # using owslib
+        wms = get_wms(
+            type_name=type_name, username=GEOSERVER_USER, password=GEOSERVER_PASSWD)
+        ws, layer_name = type_name.split(':')
+        self.assertTrue(layer_name in wms.contents,
+                        '%s is not in %s' % (layer_name, wms.contents))
+
+    def check_layer_geoserver_rest(self, layer_name):
+        """ Check that a layer shows up in GeoServer rest api after
+        the uploader is done"""
+        # using gsconfig to test the geoserver rest api.
+        layer = self.catalog.get_layer(layer_name)
+        self.assertIsNotNone(layer)
+
+    def check_and_pass_through_timestep(self, redirect_to):
+        time_step = upload_step('time')
+        srs_step = upload_step('srs')
+        if srs_step in redirect_to:
+            resp = self.client.make_request(redirect_to)
+        else:
+            self.assertTrue(time_step in redirect_to)
+        resp = self.client.make_request(redirect_to)
+        token = self.client.get_csrf_token(True)
+        self.assertEqual(resp.status_code, 200)
+        resp = self.client.make_request(
+            redirect_to, {'csrfmiddlewaretoken': token}, ajax=True)
+        return resp, resp.json()
+
+    def complete_raster_upload(self, file_path, resp, data):
+        return self.complete_upload(file_path, resp, data, is_raster=True)
+
+    def check_save_step(self, resp, data):
+        """Verify the initial save step"""
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(isinstance(data, dict))
+        # make that the upload returns a success True key
+        self.assertTrue(data['success'], 'expected success but got %s' % data)
+        self.assertTrue('redirect_to' in data)
+
+    def complete_upload(self, file_path, resp, data, is_raster=False):
+        """Method to check if a layer was correctly uploaded to the
+        GeoNode.
+
+        arguments: file path, the django http response
+
+           Checks to see if a layer is configured in Django
+           Checks to see if a layer is configured in GeoServer
+               checks the Rest API
+               checks the get cap document """
+
+        layer_name, ext = os.path.splitext(os.path.basename(file_path))
+
+        if not isinstance(data, string_types):
+            self.check_save_step(resp, data)
+
+            layer_page = self.finish_upload(
+                data['redirect_to'],
+                layer_name,
+                is_raster)
+
+            self.check_layer_complete(layer_page, layer_name)
+
+    def finish_upload(
+            self,
+            current_step,
+            layer_name,
+            is_raster=False,
+            skip_srs=False):
+        if not is_raster and _ALLOW_TIME_STEP:
+            resp, data = self.check_and_pass_through_timestep(current_step)
+            self.assertEqual(resp.status_code, 200)
+            if not isinstance(data, string_types):
+                if data['success']:
+                    self.assertTrue(
+                        data['success'],
+                        'expected success but got %s' %
+                        data)
+                    self.assertTrue('redirect_to' in data)
+                    current_step = data['redirect_to']
+                    self.wait_for_progress(data.get('progress'))
+
+        if not is_raster and not skip_srs:
+            self.assertTrue(upload_step('srs') in current_step)
+            # if all is good, the srs step will redirect to the final page
+            final_step = current_step.replace('srs', 'final')
+            resp = self.client.make_request(final_step)
+        else:
+            self.assertTrue(
+                urlsplit(upload_step('final')).path in current_step,
+                f"current_step: {current_step} - upload_step('final'): {upload_step('final')}"
+            )
+            resp = self.client.get(current_step)
+
+        self.assertEqual(resp.status_code, 200)
+        try:
+            c = resp.json()
+            url = c['url']
+            url = unquote(url)
+            # and the final page should redirect to the layer page
+            # @todo - make the check match completely (endswith at least)
+            # currently working around potential 'orphaned' db tables
+            self.assertTrue(
+                layer_name in url, 'expected %s in URL, got %s' %
+                (layer_name, url))
+            return url
+        except Exception:
+            return current_step
+
+    def check_upload_model(self, original_name):
+        # we can only test this if we're using the same DB as the test instance
+        if not settings.OGC_SERVER['default']['DATASTORE']:
+            return
+        upload = None
+        try:
+            upload = Upload.objects.filter(name__icontains=str(original_name)).last()
+            # Making sure the Upload object is present on the DB and
+            # the import session is COMPLETE
+            if upload and not upload.complete:
+                logger.warning(
+                    "Upload not complete for Layer %s" %
+                    original_name)
+        except Upload.DoesNotExist:
+            self.fail('expected to find Upload object for %s' % original_name)
+
+    def check_layer_complete(self, layer_page, original_name):
+        '''check everything to verify the layer is complete'''
+        self.check_layer_geonode_page(layer_page)
+        # @todo use the original_name
+        # currently working around potential 'orphaned' db tables
+        # this grabs the name from the url (it might contain a 0)
+        type_name = os.path.basename(layer_page)
+        layer_name = original_name
+        try:
+            layer_name = type_name.split(':')[1]
+        except Exception:
+            pass
+
+        # work around acl caching on geoserver side of things
+        caps_found = False
+        for i in range(10):
+            time.sleep(.5)
+            try:
+                self.check_layer_geoserver_caps(type_name)
+                self.check_layer_geoserver_rest(layer_name)
+                caps_found = True
+            except Exception:
+                pass
+        if not caps_found:
+            logger.warning(
+                "Could not recognize Layer %s on GeoServer WMS Capa" %
+                original_name)
+        self.check_upload_model(layer_name)
+
+    def check_invalid_projection(self, layer_name, resp, data):
+        """ Makes sure that we got the correct response from an layer
+        that can't be uploaded"""
+        self.assertTrue(resp.status_code, 200)
+        if not isinstance(data, string_types):
+            self.assertTrue(data['success'])
+            srs_step = upload_step("srs")
+            if "srs" in data['redirect_to']:
+                self.assertTrue(srs_step in data['redirect_to'])
+                resp, soup = self.client.get_html(data['redirect_to'])
+                # grab an h2 and find the name there as part of a message saying it's
+                # bad
+                h2 = soup.find_all(['h2'])[0]
+                self.assertTrue(str(h2).find(layer_name))
+
+    def check_upload_complete(self, layer_name, resp, data):
+        """ Makes sure that we got the correct response from an layer
+        that can't be uploaded"""
+        self.assertTrue(resp.status_code, 200)
+        if not isinstance(data, string_types):
+            self.assertTrue(data['success'])
+            final_step = upload_step("final")
+            if "final" in data['redirect_to']:
+                self.assertTrue(final_step in data['redirect_to'])
+
+    def upload_folder_of_files(self, folder, final_check, session_ids=None):
+
+        mains = ('.tif', '.shp', '.zip', '.asc')
+
+        def is_main(_file):
+            _, ext = os.path.splitext(_file)
+            return (ext.lower() in mains)
+
+        for main in filter(is_main, os.listdir(folder)):
+            # get the abs path to the file
+            _file = os.path.join(folder, main)
+            base, _ = os.path.splitext(_file)
+            resp, data = self.client.upload_file(_file)
+            if session_ids is not None:
+                if not isinstance(data, string_types) and data.get('url'):
+                    session_id = re.search(
+                        r'.*id=(\d+)', data.get('url')).group(1)
+                    if session_id:
+                        session_ids += [session_id]
+            if not isinstance(data, string_types):
+                self.wait_for_progress(data.get('progress'))
+            final_check(base, resp, data)
 
     def upload_file(self, fname, final_check,
                     check_name=None, session_ids=None):
@@ -210,16 +421,9 @@ class UploaderBase(GeoNodeBaseTestSupport):
     def wait_for_progress(self, progress_url):
         if progress_url:
             resp = self.client.get(progress_url)
-            print("progress_url: " + str(progress_url))
-            logger.warning("progress_url: " + str(progress_url))
-            print("Resp: " + str(resp))
-            logger.warning("Resp: " + str(resp))
             json_data = resp.json()
-            print("json_data: " + str(json_data))
             # "COMPLETE" state means done
             if json_data.get('state', '') == 'RUNNING':
-                print("running inside loop " + str(json_data.get('state', '')))
-                logger.warning("running " + str(json_data.get('state', '')))
                 time.sleep(0.1)
                 self.wait_for_progress(progress_url)
 
@@ -240,15 +444,140 @@ class UploaderBase(GeoNodeBaseTestSupport):
 
 class TestUpload(UploaderBase):
 
+    def test_shp_upload(self):
+        """ Tests if a vector layer can be uploaded to a running GeoNode/GeoServer"""
+        layer_name = 'san_andres_y_providencia_water'
+        fname = os.path.join(
+            GOOD_DATA,
+            'vector',
+            '%s.shp' % layer_name)
+        self.upload_file(fname,
+                         self.complete_upload,
+                         check_name='%s' % layer_name)
+
+        test_layer = Layer.objects.filter(name__icontains='%s' % layer_name).last()
+        if test_layer:
+            layer_attributes = test_layer.attributes
+            self.assertIsNotNone(layer_attributes)
+
+            # Links
+            _def_link_types = ['original', 'metadata']
+            _links = Link.objects.filter(link_type__in=_def_link_types)
+            # Check 'original' and 'metadata' links exist
+            self.assertIsNotNone(
+                _links,
+                "No 'original' and 'metadata' links have been found"
+            )
+            self.assertTrue(
+                _links.count() > 0,
+                "No 'original' and 'metadata' links have been found"
+            )
+            # Check original links in csw_anytext
+            _post_migrate_links_orig = Link.objects.filter(
+                resource=test_layer.resourcebase_ptr,
+                resource_id=test_layer.resourcebase_ptr.id,
+                link_type='original'
+            )
+
+            for _link_orig in _post_migrate_links_orig:
+                self.assertIn(
+                    _link_orig.url,
+                    test_layer.csw_anytext,
+                    "The link URL {0} is not present in the 'csw_anytext' attribute of the layer '{1}'".format(
+                        _link_orig.url,
+                        test_layer.alternate
+                    )
+                )
+            # Check catalogue
+            catalogue = get_catalogue()
+            record = catalogue.get_record(test_layer.uuid)
+            self.assertIsNotNone(record)
+            self.assertTrue(
+                hasattr(record, 'links'),
+                "No records have been found in the catalogue for the resource '{}'".format(
+                    test_layer.alternate
+                )
+            )
+            # Check 'metadata' links for each record
+            for mime, name, metadata_url in record.links['metadata']:
+                try:
+                    _post_migrate_link_meta = Link.objects.get(
+                        resource=test_layer.resourcebase_ptr,
+                        url=metadata_url,
+                        name=name,
+                        extension='xml',
+                        mime=mime,
+                        link_type='metadata'
+                    )
+                    self.assertIsNotNone(
+                        _post_migrate_link_meta,
+                        "No '{}' links have been found in the catalogue for the resource '{}'".format(
+                            name,
+                            test_layer.alternate
+                        )
+                    )
+                except Link.DoesNotExist:
+                    _post_migrate_link_meta = None
+
+    def test_raster_upload(self):
+        """ Tests if a raster layer can be upload to a running GeoNode GeoServer"""
+        fname = os.path.join(GOOD_DATA, 'raster', 'relief_san_andres.tif')
+        self.upload_file(fname, self.complete_raster_upload,
+                         check_name='relief_san_andres')
+
+        test_layer = Layer.objects.all().first()
+        self.assertIsNotNone(test_layer)
+
+    def test_zipped_upload(self):
+        """Test uploading a zipped shapefile"""
+        fd, abspath = self.temp_file('.zip')
+        fp = os.fdopen(fd, 'wb')
+        zf = ZipFile(fp, 'w', allowZip64=True)
+        with zf:
+            fpath = os.path.join(
+                GOOD_DATA,
+                'vector',
+                'san_andres_y_providencia_poi.*')
+            for f in glob.glob(fpath):
+                zf.write(f, os.path.basename(f))
+
+        self.upload_file(
+            abspath,
+            self.complete_upload,
+            check_name='san_andres_y_providencia_poi')
+
+    def test_ascii_grid_upload(self):
+        """ Tests the layers that ASCII grid files are uploaded along with aux"""
+        session_ids = []
+
+        PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+        thelayer_path = os.path.join(
+            PROJECT_ROOT,
+            'data/arc_sample')
+        self.upload_folder_of_files(
+            thelayer_path,
+            self.complete_raster_upload,
+            session_ids=session_ids)
+
+    def test_invalid_layer_upload(self):
+        """ Tests the layers that are invalid and should not be uploaded"""
+        # this issue with this test is that the importer supports
+        # shapefiles without an .prj
+        session_ids = []
+
+        invalid_path = os.path.join(BAD_DATA)
+        self.upload_folder_of_files(
+            invalid_path,
+            self.check_invalid_projection,
+            session_ids=session_ids)
 
     def test_coherent_importer_session(self):
         """ Tests that the upload computes correctly next session IDs"""
         session_ids = []
-"""
+
         # First of all lets upload a raster
         fname = os.path.join(GOOD_DATA, 'raster', 'relief_san_andres.tif')
         self.assertTrue(os.path.isfile(fname))
-
         self.upload_file(
             fname,
             self.complete_raster_upload,
@@ -271,7 +600,7 @@ class TestUpload(UploaderBase):
         self.assertTrue(len(session_ids) >= 0)
         if len(session_ids) > 1:
             self.assertTrue(int(session_ids[0]) < int(session_ids[1]))
-"""
+
     def test_extension_not_implemented(self):
         """Verify a error message is return when an unsupported layer is
         uploaded"""
