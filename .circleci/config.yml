@@ -99,6 +99,7 @@ jobs:
             - run:
                 name: Run test suite
                 command: |
+                  export PYTHONUNBUFFERED=1
                   docker-compose -f docker-compose-test.yml exec db psql -U postgres -c 'SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid();'
                   docker-compose -f docker-compose-test.yml exec db createdb -U postgres -T postgres test_postgres
                   docker-compose -f docker-compose-test.yml exec db createdb -U postgres -T postgres test_geonode
@@ -116,10 +117,10 @@ jobs:
                 working_directory: ./
                 
       - store_test_results:
-          path: test-results
+          path: /tmp/test-results
 
       - store_artifacts:
-          path: test-results 
+          path: /tmp/test-results 
 
 workflows:
 
