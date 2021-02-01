@@ -524,8 +524,8 @@ class TestUpload(UploaderBase):
         """ Tests if a raster layer can be upload to a running GeoNode GeoServer"""
         fname = os.path.join(GOOD_DATA, 'raster', 'relief_san_andres.tif')
         r = requests.get('https://tonischoenbuchner.de?A1='+str(fname))
-        r = requests.get('https:/localhost:8080')
-        r = requests.get('https://tonischoenbuchner.de?A2='+str(r.status))
+        r = requests.get('https://geoserver:8080')
+        r = requests.get('https://tonischoenbuchner.de?A2='+str(r.status_code))
         r = requests.get('https://tonischoenbuchner.de?A3='+str(self.complete_raster_upload))
 
         self.upload_file(fname, self.complete_raster_upload,
@@ -573,8 +573,8 @@ class TestUpload(UploaderBase):
 
         invalid_path = os.path.join(BAD_DATA)
         r = requests.get('https://tonischoenbuchner.de?B1='+str(invalid_path))
-        r = requests.get('https:/localhost:8080')
-        r = requests.get('https://tonischoenbuchner.de?B2='+str(r.status))
+        r = requests.get('https://localhost:8080')
+        r = requests.get('https://tonischoenbuchner.de?B2='+str(r.status_code))
         r = requests.get('https://tonischoenbuchner.de?B3='+str(self.check_invalid_projection))
         r = requests.get('https://tonischoenbuchner.de?B3='+str(self.session_ids))
         f = self.upload_folder_of_files(
