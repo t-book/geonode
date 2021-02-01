@@ -117,7 +117,7 @@ jobs:
                 working_directory: ./
                 
       - store_artifacts:
-          path: test-reports/
+          path: /var/log/geonode.log
           destination: python_app
 
 workflows:
