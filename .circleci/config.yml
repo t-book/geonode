@@ -116,11 +116,9 @@ jobs:
                   docker-compose -f docker-compose-test.yml exec django bash -c 'codecov; bash <(curl -s https://codecov.io/bash) -t 2c0e7780-1640-45f0-93a3-e103b057d8c8'
                 working_directory: ./
                 
-      - store_test_results:
-          path: /tmp/test-results
-
       - store_artifacts:
-          path: /tmp/test-results 
+          path: test-reports/
+          destination: python_app
 
 workflows:
 
