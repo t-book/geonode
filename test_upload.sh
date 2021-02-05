@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export SITEURL=http://localhost:8001/
+export SITEURL=http://localhost:8000/
 export BACKEND=geonode.geoserver
 export DOCKER_COMPOSE_VERSION=1.19.0
 export GEOSERVER_SERVER_URL=http://geoserver:8080/geoserver/

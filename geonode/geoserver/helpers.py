@@ -1997,7 +1997,7 @@ _wms = None
 _csw = None
 _user, _password = ogc_server_settings.credentials
 
-url = ogc_server_settings.rest
+url = http://geoserver:8080/geoserver/rest
 gs_catalog = Catalog(url, _user, _password,
                      retries=ogc_server_settings.MAX_RETRIES,
                      backoff_factor=ogc_server_settings.BACKOFF_FACTOR)

