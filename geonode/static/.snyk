@@ -1,0 +1,22 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.21.5
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  'npm:hoek:20180212':
+    - openlayers > closure-util > get-down > request > hawk > hoek:
+        patched: '2021-09-02T19:44:26.068Z'
+    - openlayers > closure-util > get-down > request > hawk > boom > hoek:
+        patched: '2021-09-02T19:44:26.068Z'
+    - openlayers > closure-util > get-down > request > hawk > sntp > hoek:
+        patched: '2021-09-02T19:44:26.068Z'
+    - angular-openlayers-directive > openlayers > closure-util > get-down > request > hawk > hoek:
+        patched: '2021-09-02T19:44:26.068Z'
+    - openlayers > closure-util > get-down > request > hawk > cryptiles > boom > hoek:
+        patched: '2021-09-02T19:44:26.068Z'
+    - angular-openlayers-directive > openlayers > closure-util > get-down > request > hawk > boom > hoek:
+        patched: '2021-09-02T19:44:26.068Z'
+    - angular-openlayers-directive > openlayers > closure-util > get-down > request > hawk > sntp > hoek:
+        patched: '2021-09-02T19:44:26.068Z'
+    - angular-openlayers-directive > openlayers > closure-util > get-down > request > hawk > cryptiles > boom > hoek:
+        patched: '2021-09-02T19:44:26.068Z'
