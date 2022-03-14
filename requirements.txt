@@ -23,7 +23,7 @@ boto3==1.16.60
 six==1.15.0
 tqdm==4.56.0
 Deprecated==1.2.11
-wrapt==1.12.1
+wrapt==1.14.0
 jsonfield==3.1.0
 jsonschema==3.2.0
 pyrsistent==0.17.3
