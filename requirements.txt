@@ -3,7 +3,7 @@ Pillow==8.1.0
 lxml==4.6.2
 defusedxml==0.6.0
 psycopg2==2.8.6
-Django==2.2.16
+Django==3.2.15
 
 # Other
 amqp==5.0.3
@@ -12,7 +12,7 @@ beautifulsoup4==4.9.3
 httplib2<0.18.2
 hyperlink==21.0.0
 idna>=2.5,<2.11
-urllib3==1.26.3
+urllib3==1.26.5
 Paver==1.3.4
 python-slugify==4.0.1
 decorator==4.4.2
@@ -154,6 +154,6 @@ pytest-splinter==3.3.1
 pytest-django==4.1.0
 setuptools==52.0.0
 pip==21.0
-Twisted==20.3.0
+Twisted==22.10.0rc1
 factory-boy==3.2.0
 flaky==3.7.0
