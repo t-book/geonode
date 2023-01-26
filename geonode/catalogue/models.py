@@ -82,7 +82,7 @@ def catalogue_post_save(instance, sender, **kwargs):
 
     # Load metadata_records for contrib apps
     if getattr(settings, "EXTRA_METADATA_ENABLED", False):
-        if hasattr(instance, 'extra_metadata'):
+        if hasattr(instance, "extra_metadata"):
             del instance.extra_metadata
         instance.extra_metadata = [
             {extra.metadata.get("name", ""): extra.metadata.get("value", "")} for extra in instance.metadata.all()
