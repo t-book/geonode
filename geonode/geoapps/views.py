@@ -175,7 +175,7 @@ def geoapp_metadata_detail(request, geoappid, template="apps/app_metadata_detail
 
     # Load metadata_records for contrib apps
     if getattr(settings, "EXTRA_METADATA_ENABLED", False):
-        if hasattr(geoapp_obj, 'extra_metadata'):
+        if hasattr(geoapp_obj, "extra_metadata"):
             del geoapp_obj.extra_metadata
         geoapp_obj.extra_metadata = [
             {extra.metadata.get("name", ""): extra.metadata.get("value", "")} for extra in geoapp_obj.metadata.all()

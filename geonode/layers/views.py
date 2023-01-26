@@ -974,7 +974,7 @@ def dataset_metadata_detail(request, layername, template="datasets/dataset_metad
 
     # Load metadata_records for contrib apps
     if getattr(settings, "EXTRA_METADATA_ENABLED", False):
-        if hasattr(layer, 'extra_metadata'):
+        if hasattr(layer, "extra_metadata"):
             del layer.extra_metadata
         layer.extra_metadata = [
             {extra.metadata.get("name", ""): extra.metadata.get("value", "")} for extra in layer.metadata.all()

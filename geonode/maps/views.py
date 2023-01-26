@@ -584,7 +584,7 @@ def map_metadata_detail(request, mapid, template="maps/map_metadata_detail.html"
 
     # Load metadata_records for contrib apps
     if getattr(settings, "EXTRA_METADATA_ENABLED", False):
-        if hasattr(map_obj, 'extra_metadata'):
+        if hasattr(map_obj, "extra_metadata"):
             del map_obj.extra_metadata
         map_obj.extra_metadata = [
             {extra.metadata.get("name", ""): extra.metadata.get("value", "")} for extra in map_obj.metadata.all()

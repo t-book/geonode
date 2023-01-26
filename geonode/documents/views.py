@@ -554,7 +554,7 @@ def document_metadata_detail(request, docid, template="documents/document_metada
 
     # Load metadata_records for contrib apps
     if getattr(settings, "EXTRA_METADATA_ENABLED", False):
-        if hasattr(document, 'extra_metadata'):
+        if hasattr(document, "extra_metadata"):
             del document.extra_metadata
         document.extra_metadata = [
             {extra.metadata.get("name", ""): extra.metadata.get("value", "")} for extra in document.metadata.all()
