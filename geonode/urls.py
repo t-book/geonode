@@ -79,7 +79,7 @@ if settings.EXTRA_METADATA_ENABLED:
         try:
             module = __import__(f"{custom_metadata_app}.urls.{pattern}_urls")
             urlpatterns += [url(f"^{pattern}/", include(f"{custom_metadata_app}.urls.{pattern}_urls"))]
-        except ModuleNotFoundError as e:
+        except ModuleNotFoundError:
             pass
 
 urlpatterns += [
