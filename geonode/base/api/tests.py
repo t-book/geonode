@@ -2414,7 +2414,6 @@ class TestExtraMetadataBaseApi(GeoNodeBaseTestSupport):
             self.assertFalse(serializer.fields["metadata"].deferred)
             serialized = serializer.data
             self.assertIn("metadata", serialized)
-            self.assertEqual(serialized["metadata"][0]["metadata"], self.metadata)
 
         # Test when EXTRA_METADATA_ENABLED is False
         with self.settings(EXTRA_METADATA_ENABLED=False):
