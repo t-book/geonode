@@ -65,6 +65,7 @@ from geonode.utils import build_absolute_uri
 from geonode.resource.api.tasks import ExecutionRequest
 from geonode.base.populate_test_data import create_models, create_single_dataset
 from geonode.resource.api.tasks import resouce_service_dispatcher
+from geonode.base.api.serializers import ResourceBaseSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -2406,7 +2407,7 @@ class TestExtraMetadataBaseApi(GeoNodeBaseTestSupport):
         self.layer.metadata.add(m)
         self.mdata = ExtraMetadata.objects.first()
 
-    def test_metadata_deferred_value(self):
+    def test_serializer_metadata_deferred_behavior(self):
         # Test when EXTRA_METADATA_ENABLED is True
         with self.settings(EXTRA_METADATA_ENABLED=True):
             serializer = ResourceBaseSerializer(self.layer)
