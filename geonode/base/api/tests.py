@@ -2406,6 +2406,22 @@ class TestExtraMetadataBaseApi(GeoNodeBaseTestSupport):
         self.layer.metadata.add(m)
         self.mdata = ExtraMetadata.objects.first()
 
+    def test_metadata_deferred_value(self):
+        # Test when EXTRA_METADATA_ENABLED is True
+        with self.settings(EXTRA_METADATA_ENABLED=True):
+            serializer = ResourceBaseSerializer(self.layer)
+            self.assertFalse(serializer.fields['metadata'].deferred)
+            serialized = serializer.data
+            self.assertIn('metadata', serialized)
+            self.assertEqual(serialized['metadata'][0]['metadata'], self.metadata)
+
+        # Test when EXTRA_METADATA_ENABLED is False
+        with self.settings(EXTRA_METADATA_ENABLED=False):
+            serializer = ResourceBaseSerializer(self.layer)
+            self.assertTrue(serializer.fields['metadata'].deferred)
+            serialized = serializer.data
+            self.assertNotIn('metadata', serialized)
+
     def test_get_will_return_the_list_of_extra_metadata(self):
         self.client.login(username="admin", password="admin")
         url = reverse("base-resources-extra-metadata", args=[self.layer.id])
