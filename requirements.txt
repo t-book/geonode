@@ -173,5 +173,5 @@ mistune==2.0.5
 wandb==0.13.10
 protobuf==3.20.3
 mako==1.2.4
-certifi>=2022.12.7 # not directly required, pinned by Snyk to avoid a vulnerability
+certifi>=2023.7.22 # not directly required, pinned by Snyk to avoid a vulnerability
 jwcrypto>=1.4 # not directly required, pinned by Snyk to avoid a vulnerability
