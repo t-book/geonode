@@ -1,8 +1,8 @@
 # native dependencies
-Pillow==9.4.0
+Pillow==10.0.0
 lxml==4.9.2
 psycopg2==2.9.5
-Django==3.2.16
+Django==3.2.23
 
 # Other
 amqp==5.1.1
