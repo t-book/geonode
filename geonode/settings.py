@@ -331,9 +331,11 @@ STATICFILES_FINDERS = (
 )
 
 CACHES = {
-    # DUMMY CACHE FOR DEVELOPMENT
     "default": {
-        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+        # DUMMY CACHE FOR DEVELOPMENT
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache"
+        if DEBUG
+        else "django.core.cache.backends.locmem.LocMemCache"
     },
     # MEMCACHED EXAMPLE
     # 'default': {
