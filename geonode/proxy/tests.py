@@ -127,7 +127,6 @@ class ProxyTest(GeoNodeBaseTestSupport):
         response = self.client.get(valid_host_payload)
         self.assertNotEqual(response.status_code, 403, response.status_code)
 
-
     @override_settings(PROXY_ALLOWED_PARAMS_NEEDLES=(), PROXY_ALLOWED_PATH_NEEDLES=())
     # @patch("geonode.proxy.views.proxy_urls_registry", ProxyUrlsRegistry().clear())
     def test_validate_remote_links_hosts(self):

@@ -81,7 +81,6 @@ def proxy(
     access_token=None,
     **kwargs,
 ):
-
     if not timeout:
         timeout = getattr(ogc_server_settings, "TIMEOUT", TIMEOUT)
 
@@ -114,7 +113,7 @@ def proxy(
             proxy_allowed_hosts.append(url.hostname)
 
         # Ensure the hostname only contains allowed characters
-        allowed_hostname_chars = re.compile(r'^[a-zA-Z0-9\.\-]+$')
+        allowed_hostname_chars = re.compile(r"^[a-zA-Z0-9\.\-]+$")
         if not allowed_hostname_chars.match(url.hostname):
             return HttpResponse(
                 "Invalid request.",
@@ -166,7 +165,6 @@ def proxy(
 
     # Avoid translating local geoserver calls into external ones
     if check_ogc_backend(geoserver.BACKEND_PACKAGE):
-
         _url = _url.replace(f"{settings.SITEURL}geoserver", ogc_server_settings.LOCATION.rstrip("/"))
         _data = _data.replace(f"{settings.SITEURL}geoserver", ogc_server_settings.LOCATION.rstrip("/"))
 
