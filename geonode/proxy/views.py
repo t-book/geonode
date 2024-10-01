@@ -107,13 +107,18 @@ def proxy(
 
     proxy_allowed_hosts = list(proxy_urls_registry.get_proxy_allowed_hosts())
     if sec_chk_hosts:
-        if any(needle.lower() in url.query.lower() for needle in PROXY_ALLOWED_PARAMS_NEEDLES) or any(
+        # Always allow requests to the local host (SITEURL)
+        if url.hostname and url.hostname == urlsplit(settings.SITEURL).hostname:
+            pass  # Local requests to SITEURL should be allowed.
+
+        # Handle SSRF attempts by validating against known allowed hosts
+        elif any(needle.lower() in url.query.lower() for needle in PROXY_ALLOWED_PARAMS_NEEDLES) or any(
             needle.lower() in url.path.lower() for needle in PROXY_ALLOWED_PATH_NEEDLES
         ):
             proxy_allowed_hosts.append(url.hostname)
 
         # Ensure the hostname is not None before validating
-        if url.hostname is None or not re.match(r"^[a-zA-Z0-9\.\-]+$", url.hostname):
+        elif url.hostname is None or not re.match(r"^[a-zA-Z0-9\.\-]+$", url.hostname):
             return HttpResponse(
                 "Invalid request: malformed hostname.",
                 status=403,
@@ -149,11 +154,7 @@ def proxy(
 
     _url = parsed.geturl()
 
-    # Some clients / JS libraries generate URLs with relative URL paths, e.g.
-    # "http://host/path/path/../file.css", which the requests library cannot
-    # currently handle (https://github.com/kennethreitz/requests/issues/2982).
-    # We parse and normalise such URLs into absolute paths before attempting
-    # to proxy the request.
+    # Normalize URLs with relative paths
     _url = URL.from_text(_url).normalize().to_text()
 
     if request.method == "GET" and access_token and "access_token" not in _url:
@@ -181,8 +182,6 @@ def proxy(
         _response = HttpResponse(content=content, reason=content, status=status, content_type=content_type)
         return fetch_response_headers(_response, response_headers)
 
-    # decompress GZipped responses if not enabled
-    # if content and response and response.getheader('Content-Encoding') == 'gzip':
     if content and content_type and content_type == "gzip":
         buf = io.BytesIO(content)
         with gzip.GzipFile(fileobj=buf) as f:
@@ -211,7 +210,6 @@ def proxy(
         )
         return response_callback(**kwargs)
     else:
-        # If we get a redirect, let's add a useful message.
         if status and status in (301, 302, 303, 307):
             _response = HttpResponse(
                 (
