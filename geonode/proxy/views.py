@@ -57,6 +57,8 @@ from geonode.geoserver.helpers import ogc_server_settings
 from geonode.assets.utils import get_default_asset
 from zipstream import ZipStream
 from .utils import proxy_urls_registry
+from urllib.parse import unquote
+
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +81,6 @@ def proxy(
     access_token=None,
     **kwargs,
 ):
-
     if not timeout:
         timeout = getattr(ogc_server_settings, "TIMEOUT", TIMEOUT)
 
@@ -92,8 +93,11 @@ def proxy(
         )
 
     raw_url = url or request.GET["url"]
-    raw_url = urljoin(settings.SITEURL, raw_url) if raw_url.startswith("/") else raw_url
-    url = urlsplit(raw_url)
+
+    # Ensure URL is fully decoded before validation
+    decoded_raw_url = unquote(raw_url)
+    raw_url = urljoin(settings.SITEURL, decoded_raw_url) if decoded_raw_url.startswith("/") else decoded_raw_url
+    url = urlsplit(decoded_raw_url)
     scheme = str(url.scheme)
     locator = str(url.path)
     if url.query != "":
@@ -108,7 +112,16 @@ def proxy(
         ):
             proxy_allowed_hosts.append(url.hostname)
 
-        if not validate_host(extract_ip_or_domain(raw_url), proxy_allowed_hosts):
+        # Ensure the hostname is not None before validating
+        if url.hostname is None or not re.match(r"^[a-zA-Z0-9\.\-]+$", url.hostname):
+            return HttpResponse(
+                "Invalid request: malformed hostname.",
+                status=403,
+                content_type="text/plain",
+            )
+
+        # Validate the decoded hostname
+        if not validate_host(extract_ip_or_domain(decoded_raw_url), proxy_allowed_hosts):
             return HttpResponse(
                 "The url provided to the proxy service is not a valid hostname.",
                 status=403,
@@ -117,7 +130,7 @@ def proxy(
 
     # Collecting headers and cookies
     if not headers:
-        headers, access_token = get_headers(request, url, raw_url, allowed_hosts=allowed_hosts)
+        headers, access_token = get_headers(request, url, decoded_raw_url, allowed_hosts=allowed_hosts)
     if not access_token:
         auth_header = None
         if "Authorization" in headers:
@@ -129,7 +142,7 @@ def proxy(
     user = get_auth_user(access_token)
 
     # Inject access_token if necessary
-    parsed = urlparse(raw_url)
+    parsed = urlparse(decoded_raw_url)
     parsed._replace(path=locator.encode("utf8"))
     if parsed.netloc == site_url.netloc and scheme != site_url.scheme:
         parsed = parsed._replace(scheme=site_url.scheme)
@@ -151,7 +164,6 @@ def proxy(
 
     # Avoid translating local geoserver calls into external ones
     if check_ogc_backend(geoserver.BACKEND_PACKAGE):
-
         _url = _url.replace(f"{settings.SITEURL}geoserver", ogc_server_settings.LOCATION.rstrip("/"))
         _data = _data.replace(f"{settings.SITEURL}geoserver", ogc_server_settings.LOCATION.rstrip("/"))
 

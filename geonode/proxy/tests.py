@@ -222,8 +222,9 @@ class ProxyTest(GeoNodeBaseTestSupport):
         request_mock = MagicMock()
         request_mock.return_value = (Response(), None)
 
-        # Non-Legit requests attempting SSRF
         geonode.proxy.views.http_client.request = request_mock
+
+        # Non-legit requests attempting SSRF
         url = f"http://example.org\\@%23{urlsplit(settings.SITEURL).hostname}"
 
         response = self.client.get(f"{self.proxy_url}?url={url}")
@@ -254,6 +255,25 @@ class ProxyTest(GeoNodeBaseTestSupport):
 
         response = self.client.get(f"{self.proxy_url}?url={url}")
         self.assertEqual(response.status_code, 200)
+
+        # Special variable attacks
+        # Test with special variable attacks like "$", "*", "?" or Unicode escape sequences
+        special_var_url = f"http://example.org/test/{urlsplit(settings.SITEURL).hostname}?var=$HOME"
+
+        response = self.client.get(f"{self.proxy_url}?url={special_var_url}")
+        self.assertEqual(response.status_code, 403, "Request with special variable should be blocked")
+
+        # Test with a URL containing a wildcard (*)
+        wildcard_url = f"http://example.org/test/{urlsplit(settings.SITEURL).hostname}*"
+
+        response = self.client.get(f"{self.proxy_url}?url={wildcard_url}")
+        self.assertEqual(response.status_code, 403, "Request with wildcard should be blocked")
+
+        # Test with percent-encoded special characters
+        encoded_url = f"http://example.org/test/%24%40%7E"
+
+        response = self.client.get(f"{self.proxy_url}?url={encoded_url}")
+        self.assertEqual(response.status_code, 403, "Request with encoded special characters should be blocked")
 
 
 class DownloadResourceTestCase(GeoNodeBaseTestSupport):
