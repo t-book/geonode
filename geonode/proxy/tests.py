@@ -101,6 +101,33 @@ class ProxyTest(GeoNodeBaseTestSupport):
         response = self.client.get(f"{self.proxy_url}?url=http://example.com/xyz")
         self.assertEqual(response.status_code, 403, response.status_code)
 
+    # Test Cases for SSRF Vulnerability
+
+    @patch("geonode.proxy.views.proxy_urls_registry", ProxyUrlsRegistry().set([TEST_DOMAIN]))
+    def test_proxy_ssrf_vulnerability(self):
+        """Test if SSRF vulnerability is prevented."""
+        ssrf_payload = (
+            f"{self.proxy_url}?url=https://geoserver%C5%95.{TEST_DOMAIN}%C5%95%09attacker.com%5cu0040google.com"
+        )
+        response = self.client.get(ssrf_payload)
+        # Expect the SSRF attempt to be blocked (403 status)
+        self.assertEqual(response.status_code, 403, response.status_code)
+
+    @patch("geonode.proxy.views.proxy_urls_registry", ProxyUrlsRegistry().set([TEST_DOMAIN]))
+    def test_proxy_invalid_hostname_characters(self):
+        """Test that invalid hostname characters are blocked."""
+        invalid_host_payload = f"{self.proxy_url}?url=https://exam#ple.com"
+        response = self.client.get(invalid_host_payload)
+        self.assertEqual(response.status_code, 403, response.status_code)
+
+    @patch("geonode.proxy.views.proxy_urls_registry", ProxyUrlsRegistry().set([TEST_DOMAIN]))
+    def test_proxy_valid_hostname_characters(self):
+        """Test that valid hostname characters are allowed."""
+        valid_host_payload = f"{self.proxy_url}?url=https://valid-hostname.com"
+        response = self.client.get(valid_host_payload)
+        self.assertNotEqual(response.status_code, 403, response.status_code)
+
+
     @override_settings(PROXY_ALLOWED_PARAMS_NEEDLES=(), PROXY_ALLOWED_PATH_NEEDLES=())
     # @patch("geonode.proxy.views.proxy_urls_registry", ProxyUrlsRegistry().clear())
     def test_validate_remote_links_hosts(self):
