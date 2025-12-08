@@ -2,7 +2,7 @@
 Pillow==10.4.0
 lxml==5.2.1
 psycopg2==2.9.9
-Django==4.2.9
+Django==4.2.27
 
 # Other
 amqp==5.2.0
@@ -10,7 +10,7 @@ beautifulsoup4==4.12.3
 httplib2<0.22.1
 hyperlink==21.0.0
 idna>=2.5,<4
-urllib3==1.26.18
+urllib3==2.6.0
 Paver==1.3.4
 python-slugify==8.0.4
 decorator==5.1.1
@@ -173,5 +173,5 @@ cryptography>=41.0.0 # not directly required, pinned by Snyk to avoid a vulnerab
 aiohttp>=3.9.0 # not directly required, pinned by Snyk to avoid a vulnerability
 dnspython>=2.6.0rc1 # not directly required, pinned by Snyk to avoid a vulnerability
 nh3==0.2.17
-sqlparse>=0.5.0 # not directly required, pinned by Snyk to avoid a vulnerability
+sqlparse>=0.5.4 # not directly required, pinned by Snyk to avoid a vulnerability
 zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
