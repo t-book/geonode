@@ -29,7 +29,7 @@ defusedxml==0.7.1
 zipstream-ng==1.7.1
 
 # Django Apps
-django-allauth==0.63.6
+django-allauth==65.13.0
 django-appconf==1.0.6
 django-celery-results==2.5.1
 django-filter==24.2
@@ -175,3 +175,4 @@ dnspython>=2.6.0rc1 # not directly required, pinned by Snyk to avoid a vulnerabi
 nh3==0.2.17
 sqlparse>=0.5.0 # not directly required, pinned by Snyk to avoid a vulnerability
 zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
+filelock>=3.20.1 # not directly required, pinned by Snyk to avoid a vulnerability
